@@ -13,18 +13,18 @@ jobs:
         gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
         gcloud --quiet config set project ${GOOGLE_PROJECT_ID}
         gcloud --quiet config set compute/zone ${GOOGLE_COMPUTE_ZONE}
-        cd hello-app
+        cd docker-nexus3
         export PROJECT_ID="$(gcloud config get-value project -q)"
         echo $PROJECT_ID
-        docker build -t gcr.io/${PROJECT_ID}/hello-app:${DOCKER_IMAGE_VERSION} .
+        docker build -t gcr.io/${PROJECT_ID}/sonatype/nexus3:${DOCKER_IMAGE_VERSION} .
         docker images
         gcloud auth configure-docker
-        docker push gcr.io/${PROJECT_ID}/hello-app:${DOCKER_IMAGE_VERSION}
-        gcloud container clusters create ${GOOGLE_KUBER_NAME}  --num-nodes=2 --labels ${GOOGLE_KUBER_LABLES}
-        kubectl run hello-web --image=gcr.io/${PROJECT_ID}/hello-app:${DOCKER_IMAGE_VERSION} --port 8080
+        docker push gcr.io/${PROJECT_ID}/sonatype/nexus3:v1
+        gcloud container clusters create ${GOOGLE_KUBER_NAME} --num-nodes=2 --labels ${GOOGLE_KUBER_LABLES}
+        kubectl run nexus3 --image=gcr.io/${PROJECT_ID}/hello-app:${DOCKER_IMAGE_VERSION} --port 8080
         kubectl get pods
-        kubectl expose deployment hello-web --type=LoadBalancer --port 80 --target-port 8080
-        kubectl scale deployment hello-web --replicas=3
+        kubectl expose deployment nexus3 --type=LoadBalancer --port 8081 --target-port 8081
+        kubectl scale deployment nexus3 --replicas=3
         #VER docker build -t gcr.io/${PROJECT_ID}/hello-app:${DOCKER_IMAGE_VERSION} .
         #VER gcloud docker -- push gcr.io/${PROJECT_ID}/hello-app:${DOCKER_IMAGE_VERSION}
         #VER kubectl set image deployment/hello-web hello-web=gcr.io/${PROJECT_ID}/hello-app:${DOCKER_IMAGE_VERSION}
